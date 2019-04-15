@@ -10,6 +10,7 @@ import com.atlassian.jira.web.action.ProjectActionSupport;
 import de.uhd.ifi.se.decision.management.jira.config.JiraIssueTypeGenerator;
 import de.uhd.ifi.se.decision.management.jira.model.KnowledgeType;
 import de.uhd.ifi.se.decision.management.jira.quality.CommentMetricCalculator;
+import de.uhd.ifi.se.decision.management.jira.quality.CommonMetricCalculator;
 
 /**
  * Renders the report page.
@@ -27,7 +28,8 @@ public class DecisionKnowledgeReport extends AbstractReport {
 	}
 
 	public Map<String, Object> createValues(ProjectActionSupport action) {
-		CommentMetricCalculator calculator = new CommentMetricCalculator(projectId, action.getLoggedInUser(),
+		CommentMetricCalculator calculatorForSentences = new CommentMetricCalculator(projectId, action.getLoggedInUser());
+		CommonMetricCalculator calculator = new CommonMetricCalculator(projectId, action.getLoggedInUser(),
 				jiraIssueTypeId);
 
 		Map<String, Object> velocityParams = new HashMap<String, Object>();
@@ -37,7 +39,7 @@ public class DecisionKnowledgeReport extends AbstractReport {
 		velocityParams.put("issueType", JiraIssueTypeGenerator.getJiraIssueTypeName(jiraIssueTypeId));
 
 		// Number of comments per JIRA issue (of the selected JIRA issue type)
-		velocityParams.put("numberOfCommentsForJiraIssues", calculator.getNumberOfCommentsForJiraIssues());
+		velocityParams.put("numberOfCommentsForJiraIssues", calculatorForSentences.getNumberOfCommentsForJiraIssues());
 
 		// Number of commits per JIRA issue
 		velocityParams.put("numberOfCommitsForJiraIssues", calculator.getNumberOfCommitsForJiraIssues());
@@ -56,7 +58,7 @@ public class DecisionKnowledgeReport extends AbstractReport {
 		velocityParams.put("numLinkDistanceDecision", calculator.getLinkDistance(KnowledgeType.DECISION));
 
 		// Number of relevant sentences per JIRA issue
-		velocityParams.put("numRelevantSentences", calculator.getNumberOfRelevantSentences());
+		velocityParams.put("numRelevantSentences", calculatorForSentences.getNumberOfRelevantSentences());
 
 		// Distribution of Knowledge Types in JIRA project
 		velocityParams.put("distriutionOfKnowledgeTypesInProject", calculator.getDistributionOfKnowledgeTypes());
