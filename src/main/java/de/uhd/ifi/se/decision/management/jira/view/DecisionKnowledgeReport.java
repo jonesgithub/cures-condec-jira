@@ -64,10 +64,8 @@ public class DecisionKnowledgeReport extends AbstractReport {
 		velocityParams.put("distriutionOfKnowledgeTypesInProject", calculator.getDistributionOfKnowledgeTypes());
 
 		// How many issues (=decision problems) are solved by a decision?
-		velocityParams.put("numberOfLinksFromIssuesToDecisions",
-				calculator.getNumberOfLinksToOtherElement(KnowledgeType.ISSUE, KnowledgeType.DECISION));
-		velocityParams.put("issuesWithoutDecisionLinks",
-				calculator.issuesWithNoExistingLinksToDecisionKnowledge(KnowledgeType.ISSUE));
+		velocityParams.put("issuesGroupedByHavingDecisions",
+				calculator.getDecKnowElementsOfTypeGroupedByHavingDecKnowElemntsOfOtherType(KnowledgeType.ISSUE, KnowledgeType.DECISION));
 
 		// For how many decisions is the issue (=decision problem) documented?
 		velocityParams.put("numberOfLinksFromDecisionsToIssues",

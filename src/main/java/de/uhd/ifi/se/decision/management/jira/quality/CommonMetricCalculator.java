@@ -131,6 +131,41 @@ public class CommonMetricCalculator {
 
 		return dkeCount;
 	}
+	public Map<String, String> getDecKnowElementsOfTypeGroupedByHavingDecKnowElemntsOfOtherType(KnowledgeType linkFrom, KnowledgeType linkTo) {
+		if (linkFrom == null || linkTo == null || linkFrom == linkTo) {
+			return new HashMap<String, String>();
+		}
+		String[] data = new String[2];
+		Arrays.fill(data, "");
+
+		List<DecisionKnowledgeElement> listOfIssues = this.persistenceManager.getDecisionKnowledgeElements(linkFrom);
+
+		for (DecisionKnowledgeElement issue : listOfIssues) {
+			List<Link> links = GenericLinkManager.getLinksForElement(issue.getId(),
+					DocumentationLocation.JIRAISSUETEXT);
+			boolean hastOtherElementLinked = false;
+
+			for (Link link : links) {
+				if (link.isValid()) {
+					DecisionKnowledgeElement dke = link.getOppositeElement(issue.getId());
+					if (dke instanceof PartOfJiraIssueText && dke.getType().equals(linkTo)) { // alt
+						hastOtherElementLinked = true;
+					}
+				}
+			}
+			if (hastOtherElementLinked) {
+				data[0] += issue.getKey()+" ";
+			} else {
+				data[1] += issue.getKey()+" ";
+			}
+		}
+
+		Map<String, String> havingLinkMap = new HashMap<String, String>();
+		havingLinkMap.put(linkFrom.toString() + " has " + linkTo.toString(), data[0].trim());
+		havingLinkMap.put(linkFrom.toString() + " has no " + linkTo.toString(), data[1].trim());
+
+		return havingLinkMap;
+	}
 
 	public String issuesWithNoExistingLinksToDecisionKnowledge(KnowledgeType linkFrom) {
 		if (linkFrom == null) {
