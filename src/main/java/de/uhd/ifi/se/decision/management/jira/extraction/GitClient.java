@@ -61,7 +61,7 @@ public interface GitClient {
 	 * Get a map of diff entries and the respective edit lists for all commits
 	 * belonging to a JIRA issue.
 	 * 
-	 * @param revCommit
+	 * @param jiraIssueKey
 	 *            commit as a RevCommit object.
 	 * @return map of diff entries and respective edit lists.
 	 */
@@ -81,9 +81,9 @@ public interface GitClient {
 	 * Get a map of diff entries and the respective edit lists for a branch of
 	 * commits indicated by the first and last commit on the branch.
 	 * 
-	 * @param firstCommits
+	 * @param firstCommit
 	 *            first commit on a branch as a RevCommit object.
-	 * @param lastCommits
+	 * @param lastCommit
 	 *            last commit on a branch as a RevCommit object.
 	 * @return map of diff entries and respective edit lists.
 	 */
