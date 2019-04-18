@@ -34,6 +34,7 @@ public class CommonMetricCalculator {
 	private List<Issue> jiraIssues;
 	private int absolutDepth;
 	private GitClient gitClient;
+	private final String dataStringSeparator = " ";
 
 	public CommonMetricCalculator(long projectId, ApplicationUser user, String jiraIssueTypeId) {
 		this.projectKey = ComponentAccessor.getProjectManager().getProjectObj(projectId).getKey();
@@ -131,7 +132,46 @@ public class CommonMetricCalculator {
 
 		return dkeCount;
 	}
-	public Map<String, String> getDecKnowElementsOfTypeGroupedByHavingDecKnowElemntsOfOtherType(KnowledgeType linkFrom, KnowledgeType linkTo) {
+
+	public Map<String, String> getDecKnowElementsOfTypeGroupedByHavingMoreThanOneDecKnowElementsOfOtherType(
+			KnowledgeType linkFrom, KnowledgeType linkTo) {
+
+		String[] data = new String[2];
+		Arrays.fill(data, "");
+
+		List<DecisionKnowledgeElement> listOfIssues = this.persistenceManager.getDecisionKnowledgeElements(linkFrom);
+
+		Map<String, Boolean> observedLinksMoreThanOnce = new HashMap<String, Boolean>();
+
+		for (DecisionKnowledgeElement issue : listOfIssues) {
+			String issueKey = issue.getKey();
+			List<Link> links = GenericLinkManager.getLinksForElement(issue.getId(),
+					DocumentationLocation.JIRAISSUETEXT);
+			int numberObservedLinks = 0;
+
+			for (Link link : links) {
+				if (link.isValid()) {
+					DecisionKnowledgeElement dke = link.getOppositeElement(issue.getId());
+					if (dke instanceof PartOfJiraIssueText && dke.getType().equals(linkTo)) { // alt
+						numberObservedLinks++;
+					}
+				}
+			}
+			if (numberObservedLinks>1) {
+				data[0] += issueKey+dataStringSeparator;
+			} else {
+				data[1] += issueKey+dataStringSeparator;
+			}
+		}
+
+		Map<String, String> havingManyLinksMap = new HashMap<String, String>();
+		havingManyLinksMap.put(linkFrom.toString() + " has more than one " + linkTo.toString(), data[0].trim());
+		havingManyLinksMap.put(linkFrom.toString() + " does not have more than one " + linkTo.toString(), data[1].trim());
+
+		return havingManyLinksMap;
+	}
+	public Map<String, String> getDecKnowElementsOfTypeGroupedByHavingDecKnowElementsOfOtherType(
+			KnowledgeType linkFrom, KnowledgeType linkTo) {
 		if (linkFrom == null || linkTo == null || linkFrom == linkTo) {
 			return new HashMap<String, String>();
 		}
@@ -154,9 +194,9 @@ public class CommonMetricCalculator {
 				}
 			}
 			if (hastOtherElementLinked) {
-				data[0] += issue.getKey()+" ";
+				data[0] += issue.getKey()+dataStringSeparator;
 			} else {
-				data[1] += issue.getKey()+" ";
+				data[1] += issue.getKey()+dataStringSeparator;
 			}
 		}
 
@@ -167,25 +207,9 @@ public class CommonMetricCalculator {
 		return havingLinkMap;
 	}
 
-	public String issuesWithNoExistingLinksToDecisionKnowledge(KnowledgeType linkFrom) {
-		if (linkFrom == null) {
-			return "";
-		}
-		String listOfElementsWithoutLink = " ";
-		List<DecisionKnowledgeElement> listOfIssues = this.persistenceManager.getDecisionKnowledgeElements(linkFrom);
-
-		for (DecisionKnowledgeElement issue : listOfIssues) {
-			if (issue instanceof PartOfJiraIssueText
-					&& !listOfElementsWithoutLink.contains(((PartOfJiraIssueText) issue).getKey().split(":")[0])) {
-				listOfElementsWithoutLink += ((PartOfJiraIssueText) issue).getKey().split(":")[0] + " ";
-			}
-		}
-		return listOfElementsWithoutLink;
-	}
-
-	public Map<String, Integer> getAlternativeArguments() {
-		int alternativesHaveArgument = 0;
-		int alternativesHaveNoArgument = 0;
+	public Map<String, String> getAlternativesHavingArguments() {
+		String alternativesHaveArgument = "";
+		String alternativesHaveNoArgument = "";
 
 		List<DecisionKnowledgeElement> alternatives = this.persistenceManager
 				.getDecisionKnowledgeElements(KnowledgeType.ALTERNATIVE);
@@ -203,45 +227,47 @@ public class CommonMetricCalculator {
 				}
 			}
 			if (hasArgument) {
-				alternativesHaveArgument++;
+				alternativesHaveArgument+=currentAlternative.getKey()+dataStringSeparator;
 			} else {
-				alternativesHaveNoArgument++;
+				alternativesHaveNoArgument+=currentAlternative.getKey()+dataStringSeparator;
 
 			}
 		}
-		Map<String, Integer> dkeCount = new HashMap<String, Integer>();
-		dkeCount.put("Alternative with Argument", alternativesHaveArgument);
-		dkeCount.put("Alternative without Argument", alternativesHaveNoArgument);
+		Map<String, String> havingArgument = new HashMap<String, String>();
+		havingArgument.put("Alternative with Argument", alternativesHaveArgument);
+		havingArgument.put("Alternative without Argument", alternativesHaveNoArgument);
 
-		return dkeCount;
+		return havingArgument;
 	}
 
-	public List<Integer> getLinkDistance(KnowledgeType type) {
+	public Map<String, Integer> getLinkDistance(KnowledgeType type) {
 		if (type == null) {
-			return new ArrayList<Integer>();
+			return new HashMap<String, Integer>();
 		}
-		List<Integer> linkDistances = new ArrayList<Integer>();
+		Map<String, Integer> linkDistances = new HashMap<String, Integer>();
 
-		List<DecisionKnowledgeElement> listOfIssues = persistenceManager.getDecisionKnowledgeElements(type);
-
-		for (DecisionKnowledgeElement currentAlternative : listOfIssues) {
-			int depth = graphRecursionBot(currentAlternative);
-			linkDistances.add(depth);
+		List<DecisionKnowledgeElement> listOfDecKnowElements = persistenceManager.getDecisionKnowledgeElements(type);
+		Integer i = 0;
+		for (DecisionKnowledgeElement currentElement : listOfDecKnowElements ) {
+			int depth = graphRecursionBot(currentElement);
+			i++;
+			linkDistances.put(String.valueOf(i)+currentElement.getKey(),depth);
 		}
 
 		return linkDistances;
 	}
 
-	public Object getLinksToIssueTypeMap(KnowledgeType knowledgeType) {
+	public Map<String, String> getLinksToIssueTypeMap(KnowledgeType knowledgeType) {
 		if (knowledgeType == null) {
 			return null;
 		}
-		Map<String, Integer> result = new HashMap<String, Integer>();
-		int withLink = 0;
-		int withoutLink = 0;
+		Map<String, String> result = new HashMap<String, String>();
+		String withLink = "";
+		String withoutLink = "";
 		for (Issue issue : jiraIssues) {
 			boolean linkExisting = false;
 			if (!checkEqualIssueTypeIssue(issue.getIssueType())) {
+				//skipped+=issue.getKey()+dataStringSeparator;
 				continue;
 			}
 			for (Link link : GenericLinkManager.getLinksForElement(issue.getId(), DocumentationLocation.JIRAISSUE)) {
@@ -254,9 +280,9 @@ public class CommonMetricCalculator {
 			}
 
 			if (linkExisting) {
-				withLink++;
+				withLink+=issue.getKey()+dataStringSeparator;
 			} else {
-				withoutLink++;
+				withoutLink+=issue.getKey()+dataStringSeparator;
 			}
 		}
 
@@ -264,6 +290,7 @@ public class CommonMetricCalculator {
 
 		result.put("Links from " + jiraIssueTypeName + " to " + knowledgeType.toString(), withLink);
 		result.put("No links from " + jiraIssueTypeName + " to " + knowledgeType.toString(), withoutLink);
+		//result.put("Skipped issues not of target type " + jiraIssueTypeName, skipped);
 		return result;
 	}
 
