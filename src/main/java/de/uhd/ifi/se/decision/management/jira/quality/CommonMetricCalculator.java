@@ -96,7 +96,8 @@ public class CommonMetricCalculator {
 		return distributionOfKnowledgeTypes;
 	}
 
-	public Map<String, Integer> getNumberOfLinksToOtherElement(KnowledgeType linkFrom, KnowledgeType linkTo) {
+	/* TODO: check why is only tested, never used */
+	public Map<String, Integer> _getNumberOfLinksToOtherElement(KnowledgeType linkFrom, KnowledgeType linkTo) {
 		if (linkFrom == null || linkTo == null) {
 			return new HashMap<String, Integer>();
 		}
@@ -133,7 +134,8 @@ public class CommonMetricCalculator {
 		return dkeCount;
 	}
 
-	public Map<String, String> getDecKnowElementsOfTypeGroupedByHavingMoreThanOneDecKnowElementsOfOtherType(
+	/* TODO: add tests */
+	public Map<String, String> getDecKnowlElementsOfATypeGroupedByHavingMoreThanOneElementsOfOtherType(
 			KnowledgeType linkFrom, KnowledgeType linkTo) {
 
 		String[] data = new String[2];
@@ -170,7 +172,9 @@ public class CommonMetricCalculator {
 
 		return havingManyLinksMap;
 	}
-	public Map<String, String> getDecKnowElementsOfTypeGroupedByHavingDecKnowElementsOfOtherType(
+
+	/* TODO: add tests */
+	public Map<String, String> getDecKnowlElementsOfATypeGroupedByHavingElementsOfOtherType(
 			KnowledgeType linkFrom, KnowledgeType linkTo) {
 		if (linkFrom == null || linkTo == null || linkFrom == linkTo) {
 			return new HashMap<String, String>();
@@ -207,6 +211,8 @@ public class CommonMetricCalculator {
 		return havingLinkMap;
 	}
 
+	/* TODO: check why is only tested, never used
+	 * using CON and PRO arguments calculations separately */
 	public Map<String, String> getAlternativesHavingArguments() {
 		String alternativesHaveArgument = "";
 		String alternativesHaveNoArgument = "";
