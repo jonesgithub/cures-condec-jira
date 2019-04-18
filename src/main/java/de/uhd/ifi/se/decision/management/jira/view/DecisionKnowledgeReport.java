@@ -69,45 +69,45 @@ public class DecisionKnowledgeReport extends AbstractReport {
 		chartId = "piechartRich-IssuesSolvedByDecision";
 		chartNamesAndPurpose.put(chartId, "How many issues (=decision problems) are solved by a decision?");
 		chartNamesAndData.put(chartId,
-				calculator.getDecKnowElementsOfTypeGroupedByHavingDecKnowElementsOfOtherType(KnowledgeType.ISSUE
+				calculator.getDecKnowlElementsOfATypeGroupedByHavingElementsOfOtherType(KnowledgeType.ISSUE
 						, KnowledgeType.DECISION)
 		);
 		chartId = "piechartRich-DecisionsSolvingIssues";
 		chartNamesAndPurpose.put(chartId, "For how many decisions is the issue (=decision problem) documented?");
 		chartNamesAndData.put(chartId,
-				calculator.getDecKnowElementsOfTypeGroupedByHavingDecKnowElementsOfOtherType(KnowledgeType.DECISION
+				calculator.getDecKnowlElementsOfATypeGroupedByHavingElementsOfOtherType(KnowledgeType.DECISION
 						, KnowledgeType.ISSUE)
 		);
 
 		chartId = "piechartRich-ProArgumentDocumentedForAlternative";
 		chartNamesAndPurpose.put(chartId, "How many alternatives have at least one pro argument documented?");
 		chartNamesAndData.put(chartId
-				, calculator.getDecKnowElementsOfTypeGroupedByHavingDecKnowElementsOfOtherType(KnowledgeType.ALTERNATIVE
+				, calculator.getDecKnowlElementsOfATypeGroupedByHavingElementsOfOtherType(KnowledgeType.ALTERNATIVE
 						, KnowledgeType.PRO));
 
 		chartId = "piechartRich-ConArgumentDocumentedForAlternative";
 		chartNamesAndPurpose.put(chartId, "How many alternatives have at least one con argument documented?");
 		chartNamesAndData.put(chartId
-				, calculator.getDecKnowElementsOfTypeGroupedByHavingDecKnowElementsOfOtherType(KnowledgeType.ALTERNATIVE
+				, calculator.getDecKnowlElementsOfATypeGroupedByHavingElementsOfOtherType(KnowledgeType.ALTERNATIVE
 						, KnowledgeType.CON));
 
 		chartId = "piechartRich-ProArgumentDocumentedForDecision";
 		chartNamesAndPurpose.put(chartId, "How many decisions have at least one pro argument documented?");
 		chartNamesAndData.put(chartId
-				, calculator.getDecKnowElementsOfTypeGroupedByHavingDecKnowElementsOfOtherType(KnowledgeType.DECISION
+				, calculator.getDecKnowlElementsOfATypeGroupedByHavingElementsOfOtherType(KnowledgeType.DECISION
 						, KnowledgeType.PRO));
 
 		chartId = "piechartRich-ConArgumentDocumentedForDecision";
 		chartNamesAndPurpose.put(chartId, "How many decisions have at least one con argument documented?");
 		chartNamesAndData.put(chartId
-				, calculator.getDecKnowElementsOfTypeGroupedByHavingDecKnowElementsOfOtherType(KnowledgeType.DECISION
+				, calculator.getDecKnowlElementsOfATypeGroupedByHavingElementsOfOtherType(KnowledgeType.DECISION
 						, KnowledgeType.CON));
 
 		/* rationale inconsistencies */
 		chartId = "piechartRich-IssuesSolvedByManyDecisions";
 		chartNamesAndPurpose.put(chartId, "Issues (=decision problems) solved by more than one decision");
 		chartNamesAndData.put(chartId,
-				calculator.getDecKnowElementsOfTypeGroupedByHavingMoreThanOneDecKnowElementsOfOtherType(KnowledgeType.ISSUE
+				calculator.getDecKnowlElementsOfATypeGroupedByHavingMoreThanOneElementsOfOtherType(KnowledgeType.ISSUE
 						, KnowledgeType.DECISION)
 		);
 
