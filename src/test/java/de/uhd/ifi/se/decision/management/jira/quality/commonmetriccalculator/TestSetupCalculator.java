@@ -29,6 +29,7 @@ public class TestSetupCalculator extends TestSetUpWithIssues {
 	private long elemIssueId =1;
 	private String projectKey = "TEST";
 
+	protected String baseIssueKey = "TEST-100";
 	protected ApplicationUser user;
 	protected DecisionKnowledgeElement decisionElement;
 	protected DecisionKnowledgeElement argumentElement;
@@ -71,7 +72,7 @@ public class TestSetupCalculator extends TestSetUpWithIssues {
 		element.setProject(projectKey);
 		element.setJiraIssueId(jiraIssueId);
 		element.setId(id);
-		element.setKey("TEST-12231"+ elemIssueId);
+		element.setKey(baseIssueKey+ elemIssueId);
 		element.setType(type);
 		element.setProject("TEST");
 		element.setDescription("Old");
