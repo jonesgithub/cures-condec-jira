@@ -11,9 +11,9 @@ import com.atlassian.jira.jql.builder.JqlQueryBuilder;
 import com.atlassian.jira.user.ApplicationUser;
 import com.atlassian.jira.web.bean.PagerFilter;
 import com.atlassian.query.Query;
+import de.uhd.ifi.se.decision.management.jira.ComponentGetter;
 import de.uhd.ifi.se.decision.management.jira.config.JiraIssueTypeGenerator;
-import de.uhd.ifi.se.decision.management.jira.extraction.GitClient;
-import de.uhd.ifi.se.decision.management.jira.extraction.impl.GitClientImpl;
+import de.uhd.ifi.se.decision.management.jira.extraction.GitExtractor;
 import de.uhd.ifi.se.decision.management.jira.filtering.JiraSearchServiceHelper;
 import de.uhd.ifi.se.decision.management.jira.model.*;
 import de.uhd.ifi.se.decision.management.jira.model.impl.DecisionKnowledgeElementImpl;
@@ -22,6 +22,9 @@ import de.uhd.ifi.se.decision.management.jira.model.text.PartOfJiraIssueText;
 import de.uhd.ifi.se.decision.management.jira.persistence.GenericLinkManager;
 import de.uhd.ifi.se.decision.management.jira.persistence.JiraIssueTextPersistenceManager;
 import de.uhd.ifi.se.decision.management.jira.view.treant.Node;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -33,8 +36,9 @@ public class CommonMetricCalculator {
 	private String jiraIssueTypeId;
 	private List<Issue> jiraIssues;
 	private int absolutDepth;
-	private GitClient gitClient;
 	private final String dataStringSeparator = " ";
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(CommonMetricCalculator.class);
 
 	public CommonMetricCalculator(long projectId, ApplicationUser user, String jiraIssueTypeId) {
 		this.projectKey = ComponentAccessor.getProjectManager().getProjectObj(projectId).getKey();
@@ -42,7 +46,6 @@ public class CommonMetricCalculator {
 		this.persistenceManager = new JiraIssueTextPersistenceManager(projectKey);
 		this.jiraIssueTypeId = jiraIssueTypeId;
 		this.jiraIssues = getJiraIssuesForProject(projectId);
-		this.gitClient = new GitClientImpl(projectKey);
 	}
 
 	private List<Issue> getJiraIssuesForProject(long projectId) {
@@ -54,7 +57,10 @@ public class CommonMetricCalculator {
 		try {
 			searchResults = searchService.search(user, query, PagerFilter.getUnlimitedFilter());
 			jiraIssues = JiraSearchServiceHelper.getJiraIssues(searchResults);
-		} catch (SearchException e) {
+		} catch (SearchException ex) {
+			LOGGER.error(ex.getMessage());
+		} catch (Exception ex) {
+			LOGGER.error(ex.getMessage());
 		}
 		return jiraIssues;
 	}
@@ -80,9 +86,17 @@ public class CommonMetricCalculator {
 
 	public Map<String, Integer> getNumberOfCommitsForJiraIssues() {
 		Map<String, Integer> resultMap = new HashMap<String, Integer>();
-		for (Issue jiraIssue : jiraIssues) {
-			int numberOfCommits = gitClient.getNumberOfCommits(jiraIssue.getKey());
-			resultMap.put(jiraIssue.getKey(), numberOfCommits);
+		try {
+			GitExtractor gitExtractor = ComponentGetter.getGitExtractor(projectKey);
+			if (gitExtractor!=null) {
+				for (Issue jiraIssue : jiraIssues) {
+					int numberOfCommits = gitExtractor.GetListOfCommitsForJiraIssue(jiraIssue).size();
+					resultMap.put(jiraIssue.getKey(), numberOfCommits);
+				}
+			}
+		}
+		catch (Exception ex) {
+			LOGGER.error(ex.getMessage());
 		}
 		return resultMap;
 	}

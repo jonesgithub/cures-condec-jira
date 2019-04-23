@@ -50,15 +50,16 @@ public class GitClientImpl implements GitClient {
 		pullOrClone(uri, directory);
 	}
 
-	public GitClientImpl(String uri, String projectKey) {
-		File directory = new File(DEFAULT_DIR + projectKey);
-		pullOrClone(uri, directory);
-	}
-
 	public GitClientImpl(String projectKey) {
 		File directory = new File(DEFAULT_DIR + projectKey);
 		String uri = ConfigPersistenceManager.getGitUri(projectKey);
-		pullOrClone(uri, directory);
+		if (uri.isEmpty()) {
+			LOGGER.error("Could not retrieve git uri from configuration.");
+			// TODO: do some error handling.
+		}
+		else {
+			pullOrClone(uri, directory);
+		}
 	}
 
 	private void pullOrClone(String uri, File directory) {
@@ -268,7 +269,7 @@ public class GitClientImpl implements GitClient {
 			String jiraIssueKeyInCommitMessage = GitClient.getJiraIssueKey(commit.getFullMessage());
 			if (jiraIssueKeyInCommitMessage.equalsIgnoreCase(jiraIssueKey)) {
 				commitsForJiraIssue.add(commit);
-				LOGGER.info("Commit message for key " + jiraIssueKey + ": " + commit.getShortMessage());
+				LOGGER.error("Commit message for key " + jiraIssueKey + ": " + commit.getShortMessage());
 			}
 		}
 		return commitsForJiraIssue;
@@ -285,18 +286,30 @@ public class GitClientImpl implements GitClient {
 
 	private Ref getRef(String jiraIssueKey) {
 		List<Ref> refs = getAllRefs();
-		Ref branch = null;
 		for (Ref ref : refs) {
-			System.out.println(ref.getName());
-			if (ref.getName().contains(jiraIssueKey)) {
+			String refNameFull = ref.getName();
+			String branchLocation = refNameFull.split("/")[1];
+			String branchName = refNameFull.split("/")[2];
+			// traverse only locally checked-out branches
+			if (!branchLocation.startsWith("head")) {
+				System.out.println("skipping branch:"+refNameFull);
+				continue;
+			}
+
+			if (branchName.startsWith(jiraIssueKey)) {
 				return ref;
-			} else if (ref.getName().equalsIgnoreCase("refs/heads/develop")) {
-				branch = ref;
-			} else if (ref.getName().equalsIgnoreCase("refs/heads/master")) {
-				branch = ref;
+			}  // TODO: why develop over master, just for developing ?
+			else if (branchName.startsWith("develop")) { 
+				return ref;
+			}
+			else if (branchName.equalsIgnoreCase("master")) {
+				return ref;
+			}
+			else {
+				System.out.println("skipping branch:"+refNameFull);
 			}
 		}
-		return branch;
+		return null;
 	}
 
 	private List<Ref> getAllRefs() {
@@ -326,6 +339,7 @@ public class GitClientImpl implements GitClient {
 	}
 
 	@Override
+	/* TODO: remove*/
 	public int getNumberOfCommits(String jiraIssueKey) {
 		if (jiraIssueKey == null || jiraIssueKey.isEmpty()) {
 			return 0;
