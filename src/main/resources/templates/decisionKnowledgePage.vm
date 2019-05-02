@@ -16,12 +16,12 @@ $webResourceManager.requireResource("de.uhd.ifi.se.decision.management.jira:deci
    <div class="tabs-pane active-pane" id="tabs-Overview">
         #parse("templates/overview.vm")
    </div>
-    <div class="tabs-pane" id="#tabs-Chronologie">
+    <div class="tabs-pane" id="tabs-Chronologie">
         #parse("templates/chronologieView.vm")
     </div>
 
-    <div class="tabs-pane" id="#tabs-Compare">
-        <h1> this will be the Compate View </h1>
+    <div class="tabs-pane" id="tabs-Compare">
+        #parse("templates/compareview.vm")
     </div>
 </div>
 #parse("templates/dialogs/createDialog.vm")
