@@ -251,11 +251,13 @@
 				<version>${amps.version}</version>
 				<extensions>true</extensions>
 				<configuration>
+					<compressResources>false</compressResources>
 					<extractDependencies>false</extractDependencies> <!-- If enabled, external .jar files will be unzipped into the final .jar file -->
 					<productVersion>${jira.version}</productVersion>
 					<productDataVersion>${jira.version}</productDataVersion>
 					<enableQuickReload>true</enableQuickReload>
 					<enableFastdev>false</enableFastdev>
+					<allowGoogleTracking>false</allowGoogleTracking>
 					<instructions>
 						<Atlassian-Plugin-Key>${atlassian.plugin.key}</Atlassian-Plugin-Key>
 						<Import-Package> org.springframework.osgi.*;resolution:="optional",
