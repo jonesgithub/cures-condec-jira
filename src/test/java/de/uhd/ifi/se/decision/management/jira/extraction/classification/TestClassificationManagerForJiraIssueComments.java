@@ -19,11 +19,11 @@ import com.atlassian.jira.user.ApplicationUser;
 import de.uhd.ifi.se.decision.management.jira.TestComponentGetter;
 import de.uhd.ifi.se.decision.management.jira.TestSetUpWithIssues;
 import de.uhd.ifi.se.decision.management.jira.extraction.ClassificationManagerForJiraIssueComments;
-import de.uhd.ifi.se.decision.management.jira.extraction.TestCommentSplitter;
-import de.uhd.ifi.se.decision.management.jira.extraction.impl.CommentSplitterImpl;
+import de.uhd.ifi.se.decision.management.jira.extraction.TestTextSplitter;
 import de.uhd.ifi.se.decision.management.jira.mocks.MockTransactionTemplate;
 import de.uhd.ifi.se.decision.management.jira.mocks.MockUserManager;
-import de.uhd.ifi.se.decision.management.jira.model.Sentence;
+import de.uhd.ifi.se.decision.management.jira.model.text.PartOfJiraIssueText;
+import de.uhd.ifi.se.decision.management.jira.persistence.JiraIssueTextPersistenceManager;
 import meka.classifiers.multilabel.LC;
 import net.java.ao.EntityManager;
 import net.java.ao.test.jdbc.Data;
@@ -32,11 +32,11 @@ import net.java.ao.test.junit.ActiveObjectsJUnitRunner;
 import weka.classifiers.meta.FilteredClassifier;
 
 @RunWith(ActiveObjectsJUnitRunner.class)
-@Data(TestCommentSplitter.AoSentenceTestDatabaseUpdater.class)
+@Data(TestTextSplitter.AoSentenceTestDatabaseUpdater.class)
 public class TestClassificationManagerForJiraIssueComments extends TestSetUpWithIssues {
 
 	private EntityManager entityManager;
-	private List<Sentence> sentences;
+	private List<PartOfJiraIssueText> sentences;
 	private ClassificationManagerForJiraIssueComments classificationManager;
 
 	@Before
@@ -67,12 +67,12 @@ public class TestClassificationManagerForJiraIssueComments extends TestSetUpWith
 
 	private void fillSentenceList() {
 		Comment comment = ComponentAccessor.getCommentManager().getLastComment(issue);
-		sentences = new CommentSplitterImpl().getSentences(comment);
+		sentences = JiraIssueTextPersistenceManager.getPartsOfComment(comment);
 	}
 
 	@Test
 	@NonTransactional
-	public void testBinaryClassification() throws Exception {
+	public void testBinaryClassification() {
 		sentences = classificationManager.classifySentencesBinary(sentences);
 		assertNotNull(sentences.get(0).isRelevant());
 		assertFalse(sentences.get(0).isValidated());
@@ -80,7 +80,7 @@ public class TestClassificationManagerForJiraIssueComments extends TestSetUpWith
 
 	@Test
 	@NonTransactional
-	public void testFineGrainedClassification() throws Exception {
+	public void testFineGrainedClassification() {
 		sentences = classificationManager.classifySentencesBinary(sentences);
 		sentences = classificationManager.classifySentencesFineGrained(sentences);
 
@@ -90,7 +90,7 @@ public class TestClassificationManagerForJiraIssueComments extends TestSetUpWith
 
 	@Test
 	@NonTransactional
-	public void testFineGrainedClassificationWithValidData() throws Exception {
+	public void testFineGrainedClassificationWithValidData() {
 		sentences.get(0).setRelevant(true);
 		sentences = classificationManager.classifySentencesFineGrained(sentences);
 
@@ -100,7 +100,7 @@ public class TestClassificationManagerForJiraIssueComments extends TestSetUpWith
 
 	@Test
 	@NonTransactional
-	public void testFineGrainedClassificationWithValidDataInAO() throws Exception {
+	public void testFineGrainedClassificationWithValidDataInAO(){
 		sentences.get(0).setRelevant(true);
 		sentences.get(0).setDescription("[issue]nonplaintext[/issue]");
 
