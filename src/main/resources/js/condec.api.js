@@ -314,6 +314,15 @@
         });
     };
 
+    ConDecAPI.prototype.getEvolutionData = function getEvolutionData(projectKey,callback){
+        getJSON(AJS.contextPath() + "/rest/decisions/latest/view/getEvolutionData.json?projectKey="+projectKey,
+            function (error , evolutionData) {
+            if(error === null){
+                callback(evolutionData);
+            }
+        });
+    };
+
     ConDecAPI.prototype.getFilterData = function getFilterData(elementKey, searchTerm, callback) {
         getJSON(AJS.contextPath() + "/rest/decisions/latest/view/getFilterData.json?elementKey=" + elementKey
         + "&searchTerm=" + searchTerm, function(error, filterData) {

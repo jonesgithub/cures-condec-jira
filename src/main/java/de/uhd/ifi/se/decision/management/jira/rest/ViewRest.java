@@ -12,6 +12,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import de.uhd.ifi.se.decision.management.jira.evolution.EvolutinDataProvider;
 import de.uhd.ifi.se.decision.management.jira.filtering.FilterDataProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -117,6 +118,18 @@ public class ViewRest {
 		ApplicationUser user = AuthenticationManager.getUser(request);
 		Vis vis = new Vis(projectKey,elementKey,false,searchTerm,user);
 		return Response.ok(vis).build();
+	}
+
+	@Path("/getEvolutionData")
+	@GET
+	@Produces({MediaType.APPLICATION_JSON})
+	public Response getEvolutionData(@QueryParam("projectKey") String projectKey, @Context HttpServletRequest request){
+		Response checkIfProjectKeyIsValidResponse = checkIfProjectKeyIsValid(projectKey);
+		if (checkIfProjectKeyIsValidResponse.getStatus() != Status.OK.getStatusCode()) {
+			return checkIfProjectKeyIsValidResponse;
+		}
+		EvolutinDataProvider dataProvider = new EvolutinDataProvider(projectKey);
+		return Response.ok(dataProvider.getEvolutionData()).build();
 	}
 
 	@Path("/getFilterData")
