@@ -20,7 +20,7 @@
     };
     ConDecEvolutionPage.prototype.buildTimeLine = function buildTimeLine(projectKey) {
         console.log("ConDec build timeline");
-
+        console.log(conDecAPI);
         conDecAPI.getEvolutionData(projectKey,function (evolutionData) {
             var container = document.getElementById('evolution-timeline');
             console.log(evolutionData);
